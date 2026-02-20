@@ -48,7 +48,7 @@ wr
 Выведем информацию о соседях на Лифе1:
 
 ```text
-1#show isis neighbors 
+L1#show isis neighbors 
  
 Instance  VRF      System Id        Type Interface          SNPA              State Hold time   Circuit Id          
 UNDERLAY  default  S1               L1   Ethernet1          P2P               UP    23          0D                  
