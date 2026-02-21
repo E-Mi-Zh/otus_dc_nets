@@ -49,7 +49,7 @@ address-family ipv4
 exit
 
 peer-filter LEAVES_ASN
-  10 match as-range 65501 - 65700 result accept
+  10 match as-range 65501 - 65535 result accept
 end
 wr
 ```
