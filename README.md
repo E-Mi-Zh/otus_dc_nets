@@ -8,3 +8,5 @@
    Underlay. IS-IS
 * [hw\_08](https://github.com/E-Mi-Zh/otus_dc_nets/tree/master/hw08) -
    Underlay. eBGP
+* [hw\_11](https://github.com/E-Mi-Zh/otus_dc_nets/tree/master/hw11) -
+   VxLAN. EVPN L2
