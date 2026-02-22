@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.1 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.1">
   <diagram name="Страница-1" id="pwORXdbcLQsAfk67vJ5V">
-    <mxGraphModel dx="815" dy="508" grid="1" gridSize="10" guides="1" tooltips="1" connect="0" arrows="0" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1426" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="0" arrows="0" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="_Qux7sE63x7iLwCVugek-1" parent="0" value="eBGP" />
@@ -301,6 +301,18 @@
           <mxGeometry height="14" width="24" x="469" y="413" as="geometry" />
         </mxCell>
         <mxCell id="a_qoHCTn7GgvQqkfRwVv-1" parent="0" value="EVPN L2" />
+        <mxCell id="DxsnhVh73lZ1AGIR2IQA-2" parent="a_qoHCTn7GgvQqkfRwVv-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=#006600;" value="192.168.1.1/24&lt;div&gt;VLAN 10&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="180" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="DxsnhVh73lZ1AGIR2IQA-3" parent="a_qoHCTn7GgvQqkfRwVv-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=#006600;" value="192.168.1.2/24&lt;div&gt;VLAN 10&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="300" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="DxsnhVh73lZ1AGIR2IQA-4" parent="a_qoHCTn7GgvQqkfRwVv-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=#006600;" value="192.168.1.3/24&lt;div&gt;VLAN 10&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="410" y="546" as="geometry" />
+        </mxCell>
+        <mxCell id="DxsnhVh73lZ1AGIR2IQA-5" parent="a_qoHCTn7GgvQqkfRwVv-1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=#006600;" value="192.168.1.4/24&lt;div&gt;VLAN 10&lt;/div&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="510" y="546" as="geometry" />
+        </mxCell>
         <mxCell id="a_qoHCTn7GgvQqkfRwVv-2" parent="0" value="Overlay" />
         <mxCell id="a_qoHCTn7GgvQqkfRwVv-3" parent="a_qoHCTn7GgvQqkfRwVv-2" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 10px; color: rgb(51, 51, 255);&quot;&gt;10.10.1.1&lt;/font&gt;" vertex="1">
           <mxGeometry height="20" width="40" x="278" y="164" as="geometry" />
