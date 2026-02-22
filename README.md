@@ -10,3 +10,5 @@
    Underlay. eBGP
 * [hw\_11](https://github.com/E-Mi-Zh/otus_dc_nets/tree/master/hw11) -
    VxLAN. EVPN L2
+* [hw\_12](https://github.com/E-Mi-Zh/otus_dc_nets/tree/master/hw12) -
+   VxLAN. EVPN L3
