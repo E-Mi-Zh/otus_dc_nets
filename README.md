@@ -12,3 +12,5 @@
    VxLAN. EVPN L2
 * [hw\_12](https://github.com/E-Mi-Zh/otus_dc_nets/tree/master/hw12) -
    VxLAN. EVPN L3
+* [hw\_14](https://github.com/E-Mi-Zh/otus_dc_nets/tree/master/hw14) -
+   VxLAN. Аналоги VPC
