@@ -267,6 +267,7 @@ channel-group 67 mode active
 int Ethernet 7
 channel-group 67 mode active
 int vlan 4094
+no autostate
 ip address 172.16.0.1/30
 mlag configuration
 domain-id LEAVES-3-4
@@ -279,30 +280,180 @@ end
 wr
 ```
 
-Добавим MLAG в конфигурацию BGP. Также, для обоих лифов изменим оверлейные
-лупбэки и номера автономных систем на одинаковые.
+Добавим MLAG в конфигурацию BGP. Лиф3 и Лиф4 соединены между собой по iBGP, со
+спайнами по eBGP. Изменим номер автономной системы на одинаковый, также уберём
+подмену некстхопа в оверлее.
+
+Для работы anycast IP на обоих лифах создадим ещё
+один лупбэк с одинаковым адресом и привяжем его к VXLAN.
 
 ```text
 enable
 conf t
+interface Loopback2
+ip address 10.10.0.103/32
+int vx1
+no vxlan source-interface Loopback1
+vxlan source-interface Loopback2
 router bgp 65503
+no neighbor EVPN next-hop-unchanged
 neighbor UNDERLAY-MLAG peer group
 neighbor UNDERLAY-MLAG remote-as 65504
 neighbor 172.16.0.2 peer group UNDERLAY-MLAG
 address-family ipv4
 neighbor UNDERLAY-MLAG activate
-network 10.10.0.3/32
+network 10.10.0.103/32
 end
 wr
 ```
 
 На клиентах настроим портченнелы также, как делали для мультихоминга.
 
-В целом MLAG у меня заработал, но похоже что-то недоработано, т.к.:
+Состояние MLAG:
 
-1. Пришлось отключить BFD для EVPN оверлея, иначе BFD флапало и постоянно сбрасывал
-   BGP соседство.
-2. Пинги между условными клиентами C1, C2 и C3, C4 проходят выборочно.
+```text
+L3#show mlag
+MLAG Configuration:              
+domain-id                          :          LEAVES-3-4
+local-interface                    :            Vlan4094
+peer-address                       :          172.16.0.2
+peer-link                          :      Port-Channel67
+hb-peer-address                    :         192.168.0.2
+peer-config                        :          consistent
+                                                       
+MLAG Status:                     
+state                              :              Active
+negotiation status                 :           Connected
+peer-link status                   :                  Up
+local-int status                   :                  Up
+system-id                          :   52:00:00:15:f4:e8
+dual-primary detection             :          Configured
+dual-primary interface errdisabled :               False
+                                                       
+MLAG Ports:                      
+Disabled                           :                   0
+Configured                         :                   0
+Inactive                           :                   0
+Active-partial                     :                   0
+Active-full                        :                   2
+```
+
+## Проверка работы
+
+В нормальном состоянии клиенты могут пинговать друг друга. Траффик с C1 идёт через
+лиф L1.
+
+```text
+C1#traceroute 192.168.2.2
+traceroute to 192.168.2.2 (192.168.2.2), 30 hops max, 60 byte packets
+ 1  192.168.1.201 (192.168.1.201)  9.435 ms  8.976 ms  8.636 ms
+ 2  * * 192.168.2.2 (192.168.2.2)  10.502 ms
+```
+
+Все BGP соседства подняты:
+
+```text
+S1#sh ip bgp summary
+BGP summary information for VRF default
+Router identifier 10.0.1.1, local AS number 65500
+Neighbor Status Codes: m - Under maintenance
+  Neighbor   V AS           MsgRcvd   MsgSent  InQ OutQ  Up/Down State   PfxRcd PfxAcc PfxAdv
+  172.16.1.1 4 65501             84        81    0    0 00:00:32 Estab   2      2      9
+  172.16.1.3 4 65502             32        32    0    0 00:00:32 Estab   2      2      9
+  172.16.1.5 4 65503             11        11    0    0 00:00:31 Estab   5      5      11
+  172.16.1.7 4 65503             11        10    0    0 00:00:31 Estab   5      5      6
+```
+
+Сымитируем сбой: отключим для начала лиф L1. Спайны перестали его видеть:
+
+```text
+S1#sh ip bgp summary
+BGP summary information for VRF default
+Router identifier 10.0.1.1, local AS number 65500
+Neighbor Status Codes: m - Under maintenance
+  Neighbor   V AS           MsgRcvd   MsgSent  InQ OutQ  Up/Down State   PfxRcd PfxAcc PfxAdv
+  172.16.1.3 4 65502             40        40    0    0 00:01:32 Estab   2      2      7
+  172.16.1.5 4 65503             19        18    0    0 00:01:31 Estab   5      5      9
+  172.16.1.7 4 65503             18        17    0    0 00:01:31 Estab   5      5      4
+```
+
+Клиент C1 по-прежнему может пинговать соседей (даже в другом VLAN), трафик при
+этом идёт через второй лиф (multihoming):
+
+```text
+1#traceroute 192.168.2.2
+traceroute to 192.168.2.2 (192.168.2.2), 30 hops max, 60 byte packets
+ 1  * * *
+ 2  192.168.2.2 (192.168.2.2)  12.300 ms  11.104 ms  12.705 ms
+```
+
+Теперь отключим лиф в MLAG паре (L4):
+
+```text
+S1#sh ip bgp summary
+BGP summary information for VRF default
+Router identifier 10.0.1.1, local AS number 65500
+Neighbor Status Codes: m - Under maintenance
+  Neighbor   V AS           MsgRcvd   MsgSent  InQ OutQ  Up/Down State   PfxRcd PfxAcc PfxAdv
+  172.16.1.3 4 65502              8         7    0    0 00:00:14 Estab   2      2      7
+  172.16.1.5 4 65503              9         7    0    0 00:00:14 Estab   5      5      4
+```
+
+Состояние MLAG:
+
+```text
+L3#sh mlag
+MLAG Configuration:              
+domain-id                          :          LEAVES-3-4
+local-interface                    :            Vlan4094
+peer-address                       :          172.16.0.2
+peer-link                          :      Port-Channel67
+hb-peer-address                    :         192.168.0.2
+peer-config                        :          consistent
+                                                       
+MLAG Status:                     
+state                              :              Active
+negotiation status                 :          Connecting
+peer-link status                   :      Lowerlayerdown
+local-int status                   :                  Up
+system-id                          :   52:00:00:15:f4:e8
+dual-primary detection             :             Running
+dual-primary interface errdisabled :               False
+                                                       
+MLAG Ports:                      
+Disabled                           :                   0
+Configured                         :                   0
+Inactive                           :                   0
+Active-partial                     :                   2
+Active-full                        :                   0
+```
+
+Пинг по-прежнему идёт:
+
+```text
+C1#ping 192.168.2.2 repeat 1
+PING 192.168.2.2 (192.168.2.2) 72(100) bytes of data.
+80 bytes from 192.168.2.2: icmp_seq=1 ttl=64 time=7.12 ms
+
+--- 192.168.2.2 ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 7.122/7.122/7.122/0.000 ms
+```
+
+Теперь поднимем обратно второй коммутатор в MLAG паре и заставим трафик идти
+через пирлинк. На лифе L3 отключим аплинки к спайнам, а на лифе L4 - даунлинки
+к клиентам.
+
+```text
+L3#sh mlag interfaces 
+                                                                   local/remote
+  mlag       desc                state       local       remote          status
+--------- ---------- -------------------- ----------- ------------ ------------
+     1                  active-partial         Po1          Po1         up/down
+     2                  active-partial         Po2          Po2         up/down
+```
+
+Пинг между клиентами по-прежнему идёт, пакеты видны в дампе wirehark на пирлинке.
 
 ## Файлы настроек
 
