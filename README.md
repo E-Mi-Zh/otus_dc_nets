@@ -16,3 +16,5 @@
    VxLAN. Аналоги VPC
 * [hw\_15](https://github.com/E-Mi-Zh/otus_dc_nets/tree/master/hw15) -
    VxLAN. Routing
+* [project](https://github.com/E-Mi-Zh/otus_dc_nets/tree/master/project) -
+   проектная работа.
